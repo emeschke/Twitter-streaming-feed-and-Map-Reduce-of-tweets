@@ -1,0 +1,35 @@
+Twitter Stream and Map Reduce.  Eric Meschke
+
+This project is dependent on two python packages:
+--Tweepy
+--MRJob
+
+These can be installed on an Ubuntu instance of linux with:
+$ pip install Tweepy
+$ pip install MRJob
+
+There are two parts to the workflow.  First is a script that reads in the the twitter stream, parses it and prints it to stdout.  The script uses the package Tweepy, which provides a wrapper around the Twitter API for authentication details and streaming.  The second is a map-reduce procedure written in MRJob to aggregate the tweet stream characteristics by minute.  Code is documented within.
+
+Usage--
+To stream the tweets into an intermediate file:
+$ python sampleTweepy.py > [tweetFile]
+--Terminate streaming tweets by pressing Crtl-c
+To run MRJob map-reduce project locally on that file:
+$ python MRTwitter.py --output-dir [outputDir] [tweetFile]
+This can be run on Hadoop or Amazon Elastic Map Reduce also with -r [runner_type].  Information is in the documentation referenced in the file.
+
+Output will be written to /outputDir/part-00000.  If the output directory already exists the procedure will not work.  
+
+Files included:
+--readme.txt
+--timeConvert.py
+--sampleTweepy.py
+--MRTwitter.py
+--tweets.csv (intermediate tweets sampled, 100k+)
+--part-00000 (the map-reduce output, about 25 entries)
+
+Short discussion: 
+Interesting project.  There are some nice packages for streaming tweets from the API.  I'm not sure that streaming the parsed tweets to stdout is the best method.  Given that output is a stream, it isn't clear that opening a file for writing for every streaming object is a good method either.  Buffering the file and writing occasionally is a better option, but the implementation seemed unecessarily tricky compared to a pipe from stdout.  Best would be a queue that processed incoming tweets, but that is a much more enterprise scale.
+
+The map-reduce is straightforward and is documented within the code.  MRJob is very finnicky about formatting, so that took a bit of work to get the CSV format.  The output is always written to part-00000, in a directory of the user's choice.
+
